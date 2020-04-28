@@ -6,6 +6,7 @@ import sys
 import os
 import playsound 
 pyautogui.PAUSE = 0.1
+duration_global = 0.1
 pyautogui.FAILSAFE = True      # 啟用自動防故障功能
 width,height = pyautogui.size()   # 螢幕的寬度和高度
 pyautogui.position()        # 滑鼠當前位置
@@ -41,7 +42,7 @@ def mouse_move_point(square, duration=0.25):
     x = int(random.random()*(square[0][1]-square[0][0])+square[0][0])
     y = int(random.random()*(square[1][1]-square[1][0])+square[1][0])
     pyautogui.moveTo(x,y,duration=duration)
-    time.sleep(random.random()*0.3+0.1)
+    time.sleep(random.random()*0.1+0.1)
     check = pyautogui.position() 
     if ((x == int(check[0])) and (y == int(check[1]))): 
         return 1
@@ -87,7 +88,7 @@ while(True):
         else:
             pyautogui.keyUp('shift')
         if ((last_action != next_action)  ):
-            ans = mouse_move_point(position_dict[define_step[next_action]], duration=0.25)
+            ans = mouse_move_point(position_dict[define_step[next_action]], duration=duration_global)
             if (ans == 0):
                 play_voice(1)
                 break
@@ -97,7 +98,7 @@ while(True):
                 play_voice(1)
                 break
 
-            ans = mouse_move_point(position_dict["中間"], duration=0.25)
+            ans = mouse_move_point(position_dict["中間"], duration=duration_global)
             if (ans == 0):
                 play_voice(1)
                 break
@@ -108,7 +109,7 @@ while(True):
         play_voice(0)
         break
     elif (define_step[next_action] == "無偵測到珠寶"):
-        ans = mouse_move_point(position_dict["中間"], duration=0.25)
+        ans = mouse_move_point(position_dict["中間"], duration=duration_global)
         if (ans == 0):
             play_voice(1)
             break
