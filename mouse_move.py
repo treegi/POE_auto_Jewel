@@ -5,7 +5,7 @@ import operator
 import sys
 import os
 import playsound 
-pyautogui.PAUSE = 0.2
+pyautogui.PAUSE = 0.1
 pyautogui.FAILSAFE = True      # 啟用自動防故障功能
 width,height = pyautogui.size()   # 螢幕的寬度和高度
 pyautogui.position()        # 滑鼠當前位置
@@ -24,12 +24,12 @@ position_dict = {
 def get_screen_pixel(pixel):
     return pyautogui.screenshot().getpixel(pixel)
 
-def mouse_right_click(next):
+def mouse_right_click(next_action):
     ans_before = get_screen_pixel(pyautogui.position())
     pyautogui.click(button='right')
     ans_after = get_screen_pixel(pyautogui.position())
     if (operator.eq(ans_before,ans_after)):
-        print(define_step[next]+"已用完，中止")
+        print(define_step[next_action]+"已用完，中止")
         play_voice(1)
         sys.exit()
         return 0
@@ -47,6 +47,7 @@ def mouse_move_point(square, duration=0.25):
         return 1
     else:
         print("使用者控制滑鼠，終止")
+        pyautogui.keyUp('shift')
         return 0
 
 cost_dict = {
@@ -72,32 +73,41 @@ def play_voice(mode):
     else:
         playsound.playsound(not_enouth_stone_success)
 
+print("3秒後開始")
+time.sleep(3)
 
+last_action =-1
 while(True):
     time.sleep(0.2)
-    next = a.predict()
-    if ((next <= 4) and (next >= 0)):
-        ans = mouse_move_point(position_dict[define_step[next]], duration=0.25)
-        if (ans == 0):
-            play_voice(1)
-            break
+    next_action = a.predict()
+    
+    if ((next_action <= 4) and (next_action >= 0)):
+        if ((define_step[next_action].find("改造石")>=0)):
+            pyautogui.keyDown('shift')
+        else:
+            pyautogui.keyUp('shift')
+        if ((last_action != next_action)  ):
+            ans = mouse_move_point(position_dict[define_step[next_action]], duration=0.25)
+            if (ans == 0):
+                play_voice(1)
+                break
 
-        ans = mouse_right_click(next)
-        if (ans == 0):
-            play_voice(1)
-            break
+            ans = mouse_right_click(next_action)
+            if (ans == 0):
+                play_voice(1)
+                break
 
-        ans = mouse_move_point(position_dict["中間"], duration=0.25)
-        if (ans == 0):
-            play_voice(1)
-            break
+            ans = mouse_move_point(position_dict["中間"], duration=0.25)
+            if (ans == 0):
+                play_voice(1)
+                break
         pyautogui.click(button='left')
-        cost_cal(define_step[next])
-    elif (define_step[next] == "完成"):
+        cost_cal(define_step[next_action])
+    elif (define_step[next_action] == "完成"):
         print("成功")
         play_voice(0)
         break
-    elif (define_step[next] == "無偵測到珠寶"):
+    elif (define_step[next_action] == "無偵測到珠寶"):
         ans = mouse_move_point(position_dict["中間"], duration=0.25)
         if (ans == 0):
             play_voice(1)
@@ -106,6 +116,9 @@ while(True):
         print("非預期錯誤")
         play_voice(1)
         break
+    last_action = next_action
+
+pyautogui.keyUp('shift')
 
 
 
