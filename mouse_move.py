@@ -10,6 +10,7 @@ duration_global = 0.1
 pyautogui.FAILSAFE = True      # 啟用自動防故障功能
 width,height = pyautogui.size()   # 螢幕的寬度和高度
 pyautogui.position()        # 滑鼠當前位置
+error_counter = 0
 
 from detect import *
 a = Auto_jewel(define_step)
@@ -77,12 +78,14 @@ def play_voice(mode):
 print("3秒後開始")
 time.sleep(3)
 
+
 last_action =-1
 while(True):
     time.sleep(0.2)
     next_action = a.predict()
     
     if ((next_action <= 4) and (next_action >= 0)):
+        error_counter = 0
         if ((define_step[next_action].find("改造石")>=0)):
             pyautogui.keyDown('shift')
         else:
@@ -109,10 +112,15 @@ while(True):
         play_voice(0)
         break
     elif (define_step[next_action] == "無偵測到珠寶"):
+        
         ans = mouse_move_point(position_dict["中間"], duration=duration_global)
         if (ans == 0):
             play_voice(1)
             break
+        if (error_counter >10):
+            play_voice(1)
+            break
+        error_counter +=1
     else:
         print("非預期錯誤")
         play_voice(1)
